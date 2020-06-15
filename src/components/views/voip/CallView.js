@@ -83,17 +83,20 @@ export default createReactClass({
     showCall: function() {
         let call;
 
+        console.log('show call ')
         if (this.props.room) {
             const roomId = this.props.room.roomId;
+            console.log('get call for room')
             call = CallHandler.getCallForRoom(roomId) ||
                 (this.props.ConferenceHandler ?
                  this.props.ConferenceHandler.getConferenceCallForRoom(roomId) :
                  null
                 );
 
-            if (this.call) {
+                console.log('SET STATE ----------------',call, this.call, this.state.call)
+
                 this.setState({ call: call });
-            }
+
         } else {
             call = CallHandler.getAnyActiveCall();
             // Ignore calls if we can't get the room associated with them.
@@ -106,30 +109,43 @@ export default createReactClass({
             this.setState({ call: call });
         }
 
-        if (call) {
-            call.setLocalVideoElement(this.getVideoView().getLocalVideoElement());
-            call.setRemoteVideoElement(this.getVideoView().getRemoteVideoElement());
-            // always use a separate element for audio stream playback.
-            // this is to let us move CallView around the DOM without interrupting remote audio
-            // during playback, by having the audio rendered by a top-level <audio/> element.
-            // rather than being rendered by the main remoteVideo <video/> element.
-            call.setRemoteAudioElement(this.getVideoView().getRemoteAudioElement());
-        }
-        if (call && call.type === "video" && call.call_state !== "ended" && call.call_state !== "ringing") {
-            // if this call is a conf call, don't display local video as the
-            // conference will have us in it
-            this.getVideoView().getLocalVideoElement().style.display = (
-                call.confUserId ? "none" : "block"
-            );
-            this.getVideoView().getRemoteVideoElement().style.display = "block";
-        } else {
-            this.getVideoView().getLocalVideoElement().style.display = "none";
-            this.getVideoView().getRemoteVideoElement().style.display = "none";
-            dis.dispatch({action: 'video_fullscreen', fullscreen: false});
-        }
+        console.log('cccall', call)
+        if(call && !call.isOpenVidu){
+            if (call) {
+                call.setLocalVideoElement(this.getVideoView().getLocalVideoElement());
+                call.setRemoteVideoElement(this.getVideoView().getRemoteVideoElement());
+                // always use a separate element for audio stream playback.
+                // this is to let us move CallView around the DOM without interrupting remote audio
+                // during playback, by having the audio rendered by a top-level <audio/> element.
+                // rather than being rendered by the main remoteVideo <video/> element.
+                call.setRemoteAudioElement(this.getVideoView().getRemoteAudioElement());
+            }
+            if (call && call.type === "video" && call.call_state !== "ended" && call.call_state !== "ringing") {
+                // if this call is a conf call, don't display local video as the
+                // conference will have us in it
+                this.getVideoView().getLocalVideoElement().style.display = (
+                    call.confUserId ? "none" : "block"
+                );
+                this.getVideoView().getRemoteVideoElement().style.display = "block";
+            } else {
+                if(this.getVideoView()){
+                    this.getVideoView().getLocalVideoElement().style.display = "none";
+                    this.getVideoView().getRemoteVideoElement().style.display = "none";
+                    dis.dispatch({action: 'video_fullscreen', fullscreen: false});
 
-        if (this.props.onResize) {
-            this.props.onResize();
+                }
+            }
+
+            if (this.props.onResize) {
+                this.props.onResize();
+            }
+        }else {
+            if(this.getVideoView()){
+                this.getVideoView().getLocalVideoElement().style.display = "none";
+                this.getVideoView().getRemoteVideoElement().style.display = "none";
+                dis.dispatch({action: 'video_fullscreen', fullscreen: false});
+
+            }
         }
     },
 
@@ -137,10 +153,13 @@ export default createReactClass({
         return this._video.current;
     },
 
+
     render: function() {
         const VideoView = sdk.getComponent('voip.VideoView');
+        const OpenViduCallView = sdk.getComponent('voip.OpenViduCallView');
         const AccessibleButton = sdk.getComponent('elements.AccessibleButton');
 
+        console.log('this.state.call', this.state.call)
         let voice;
         if (this.state.call && this.state.call.type === "voice" && this.props.showVoice) {
             const callRoom = MatrixClientPeg.get().getRoom(this.state.call.roomId);
@@ -149,6 +168,12 @@ export default createReactClass({
                 { _t("Active call (%(roomName)s)", {roomName: callRoom.name}) }
                 </AccessibleButton>
             );
+        }
+        if(this.state.call && this.state.call.isOpenVidu){
+            console.log('OPENVIDU CALL STATE', this.state.call.call_state)
+            if (this.state.call && this.state.call.type === "video" && this.state.call.call_state !== "ended" && this.state.call.call_state !== "ringing") {
+                return <OpenViduCallView/>
+            }
         }
 
         return (

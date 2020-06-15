@@ -370,6 +370,7 @@ export default class BasicMessageEditor extends React.Component {
     }
 
     _onKeyDown = (event) => {
+        console.log('event ', event.key)
         const model = this.props.model;
         const modKey = IS_MAC ? event.metaKey : event.ctrlKey;
         let handled = false;
@@ -467,6 +468,7 @@ export default class BasicMessageEditor extends React.Component {
             event.preventDefault();
             event.stopPropagation();
         }
+        console.log('handled ', handled)
     }
 
     async _tabCompleteName() {
