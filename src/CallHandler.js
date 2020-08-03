@@ -182,6 +182,7 @@ function _setCallListeners(call) {
     // map web rtc states to dummy UI state
     // ringing|ringback|connected|ended|busy|stop_ringback|stop_ringing
     call.on("state", function(newState, oldState) {
+        console.log('Listener state', newState, oldState)
         if (newState === "ringing") {
             _setCallState(call, call.roomId, "ringing");
             pause("ringbackAudio");
@@ -274,8 +275,7 @@ function _onAction(payload) {
         _setCallListeners(newCall);
         if(newCall.isOpenVidu){
             newCall.placeVideoCall()
-        }
-        if (payload.type === 'voice') {
+        }else  if (payload.type === 'voice') {
             newCall.placeVoiceCall();
         } else if (payload.type === 'video') {
             newCall.placeVideoCall(
@@ -351,7 +351,7 @@ function _onAction(payload) {
                     //     local_element: payload.local_element,
                     // });
                     console.info("Place %s call in %s", payload.type, payload.room_id);
-                    const call = Matrix.createNewMatrixOpenViduCall(MatrixClientPeg.get(), payload.room_id);
+                    const call = Matrix.createNewMatrixCall(MatrixClientPeg.get(), payload.room_id);
                     placeCall(call);
                 }
             }

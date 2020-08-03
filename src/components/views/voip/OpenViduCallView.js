@@ -8,6 +8,8 @@ class OpenViduCallView extends Component {
         super(props);
         this.OPENVIDU_SERVER_URL = 'https://openvidu2.dev.oniabsis.com/';
         this.OPENVIDU_SERVER_SECRET = 'pfcqopfs';
+        // this.OPENVIDU_SERVER_URL = 'https://127.0.0.1:4443/';
+        // this.OPENVIDU_SERVER_SECRET = 'MY_SECRET';
         this.state = {
             mySessionId: 'SessionA',
             myUserName: 'OpenVidu_User_' + Math.floor(Math.random() * 100),

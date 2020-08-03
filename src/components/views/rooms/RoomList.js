@@ -232,7 +232,9 @@ export default createReactClass({
                 this.tooltip = payload.tooltip;
                 break;
             case 'call_state':
+                console.log('call state event')
                 var call = CallHandler.getCall(payload.room_id);
+                if(call)  console.log('Call state in room list ............', call.call_state);
                 if (call && call.call_state === 'ringing') {
                     this.setState({
                         incomingCall: call,
@@ -299,6 +301,7 @@ export default createReactClass({
     },
 
     componentWillUnmount: function() {
+        console.log('RoomList componentWillUnmount')
         this.mounted = false;
 
         dis.unregister(this.dispatcherRef);
